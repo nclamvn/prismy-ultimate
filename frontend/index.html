@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>PRISMY Translation System</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: -apple-system, system-ui, sans-serif;
+            background: #f5f5f5;
+            color: #333;
+        }
+        .header {
+            background: #2c3e50;
+            color: white;
+            padding: 2rem;
+            text-align: center;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+        .upload-section {
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+        }
+        .controls {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        input[type="file"] {
+            flex: 1;
+            padding: 0.5rem;
+        }
+        button {
+            padding: 0.75rem 2rem;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: opacity 0.2s;
+        }
+        button:hover { opacity: 0.8; }
+        button:disabled { opacity: 0.5; cursor: not-allowed; }
+        .primary { background: #3498db; color: white; }
+        .success { background: #27ae60; color: white; }
+        .status {
+            margin-top: 1rem;
+            padding: 1rem;
+            border-radius: 4px;
+            display: none;
+        }
+        .status.info { background: #e3f2fd; }
+        .status.error { background: #ffebee; color: #c62828; }
+        .status.success { background: #e8f5e9; color: #2e7d32; }
+        .results {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            display: none;
+        }
+        .result-panel {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .result-panel h3 {
+            margin-bottom: 1rem;
+            color: #2c3e50;
+        }
+        .content-box {
+            background: #f8f9fa;
+            padding: 1rem;
+            border-radius: 4px;
+            max-height: 500px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            font-family: monospace;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+        .download-section {
+            margin-top: 1rem;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>PRISMY Translation System</h1>
+        <p>Professional PDF Translation Service</p>
+    </div>
+
+    <div class="container">
+        <div class="upload-section">
+            <div class="controls">
+                <input type="file" id="pdfFile" accept=".pdf">
+                <button class="primary" onclick="translatePDF()" id="translateBtn">
+                    Translate PDF
+                </button>
+            </div>
+            <div id="status" class="status"></div>
+        </div>
+
+        <div class="results" id="results">
+            <div class="result-panel">
+                <h3>Original Text</h3>
+                <div class="content-box" id="originalText"></div>
+            </div>
+            <div class="result-panel">
+                <h3>Vietnamese Translation</h3>
+                <div class="content-box" id="translatedText"></div>
+            </div>
+        </div>
+
+        <div class="download-section" id="downloadSection">
+            <button class="success" onclick="download('original')">
+                Download Original
+            </button>
+            <button class="success" onclick="download('translated')">
+                Download Translation
+            </button>
+        </div>
+    </div>
+
+    <script>
+    let currentTranslationId = null;
+
+    async function translatePDF() {
+        const fileInput = document.getElementById('pdfFile');
+        const file = fileInput.files[0];
+        
+        if (!file) {
+            showStatus('Please select a PDF file', 'error');
+            return;
+        }
+
+        const translateBtn = document.getElementById('translateBtn');
+        translateBtn.disabled = true;
+        showStatus('Processing... This may take a few minutes for large files.', 'info');
+
+        const formData = new FormData();
+        formData.append('file', file);
+
+        try {
+            const response = await fetch('http://localhost:8000/translate', {
+                method: 'POST',
+                body: formData
+            });
+
+            const data = await response.json();
+            
+            if (response.ok) {
+                currentTranslationId = data.id;
+                displayResults(data);
+                showStatus(`Success! Processed ${data.pages} pages.`, 'success');
+            } else {
+                showStatus(data.error || 'Translation failed', 'error');
+            }
+        } catch (error) {
+            showStatus('Connection error: ' + error.message, 'error');
+        } finally {
+            translateBtn.disabled = false;
+        }
+    }
+
+    function displayResults(data) {
+        document.getElementById('originalText').textContent = data.original;
+        document.getElementById('translatedText').textContent = data.translated;
+        document.getElementById('results').style.display = 'grid';
+        document.getElementById('downloadSection').style.display = 'block';
+    }
+
+    async function download(type) {
+        if (!currentTranslationId) return;
+        
+        window.open(`http://localhost:8000/download/${currentTranslationId}/${type}`, '_blank');
+    }
+
+    function showStatus(message, type) {
+        const status = document.getElementById('status');
+        status.textContent = message;
+        status.className = `status ${type}`;
+        status.style.display = 'block';
+    }
+    </script>
+</body>
+</html>

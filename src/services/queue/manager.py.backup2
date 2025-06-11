@@ -1,0 +1,452 @@
+"""
+Queue Manager for processing 500+ pages documents
+Handles extraction, chunking, translation, and reconstruction queues
+"""
+import asyncio
+import json
+import logging
+from typing import Dict, Any, Optional, List
+from datetime import datetime
+from pathlib import Path
+import redis.asyncio as redis
+from dataclasses import dataclass, asdict
+from enum import Enum
+
+logger = logging.getLogger(__name__)
+
+class JobStatus(Enum):
+    PENDING = "pending"
+    EXTRACTING = "extracting"
+    CHUNKING = "chunking"
+    TRANSLATING = "translating"
+    RECONSTRUCTING = "reconstructing"
+    COMPLETED = "completed"
+    FAILED = "failed"
+
+@dataclass
+class TranslationJob:
+    """Translation job data structure"""
+    job_id: str
+    file_path: str
+    source_lang: str = "vi"
+    target_lang: str = "en"
+    tier: str = "standard"
+    status: JobStatus = JobStatus.PENDING
+    created_at: datetime = None
+    updated_at: datetime = None
+    progress: float = 0.0
+    total_pages: int = 0
+    processed_pages: int = 0
+    extraction_file: Optional[str] = None
+    translation_file: Optional[str] = None
+    output_file: Optional[str] = None
+    error: Optional[str] = None
+    
+    def __post_init__(self):
+        if not self.created_at:
+            self.created_at = datetime.now()
+        if not self.updated_at:
+            self.updated_at = datetime.now()
+            
+    def to_dict(self) -> Dict[str, Any]:
+        """Convert to dictionary"""
+        data = asdict(self)
+        data['status'] = self.status.value
+        data['created_at'] = self.created_at.isoformat()
+        data['updated_at'] = self.updated_at.isoformat()
+        
+        # Handle None values
+        for key, value in data.items():
+            if value is None:
+                data[key] = ''
+                
+        return data
+        
+    @classmethod
+    def from_dict(cls, data: Dict[str, Any]) -> 'TranslationJob':
+        """Create from dictionary"""
+        data['status'] = JobStatus(data['status'])
+        data['created_at'] = datetime.fromisoformat(data['created_at'])
+        data['updated_at'] = datetime.fromisoformat(data['updated_at'])
+        
+        # Handle empty strings
+        for key in ['extraction_file', 'translation_file', 'output_file', 'error']:
+            if key in data and data[key] == '':
+                data[key] = None
+                
+        return cls(**data)
+
+
+class QueueManager:
+    """
+    Manages processing queues for large documents
+    """
+    
+    def __init__(self, redis_url: str = "redis://localhost:6379"):
+        """Initialize queue manager"""
+        self.redis_client = redis.from_url(redis_url)
+        self.jobs: Dict[str, TranslationJob] = {}
+        
+        self.EXTRACT_QUEUE = "prismy:extract"
+        self.CHUNK_QUEUE = "prismy:chunk"
+        self.TRANSLATE_QUEUE = "prismy:translate"
+        self.RECONSTRUCT_QUEUE = "prismy:reconstruct"
+        
+        self.JOB_KEY_PREFIX = "prismy:job:"
+        
+    async def create_job(
+        self,
+        file_path: str,
+        source_lang: str = "vi",
+        target_lang: str = "en",
+        tier: str = "standard"
+    ) -> TranslationJob:
+        """Create a new translation job"""
+        import uuid
+        
+        job_id = str(uuid.uuid4())
+        job = TranslationJob(
+            job_id=job_id,
+            file_path=file_path,
+            source_lang=source_lang,
+            target_lang=target_lang,
+            tier=tier
+        )
+        
+        job_key = f"{self.JOB_KEY_PREFIX}{job_id}"
+        self.redis_client.hset(
+            job_key,
+            mapping=job.to_dict()
+        )
+        
+        await self.add_to_queue(self.EXTRACT_QUEUE, job_id)
+        
+        logger.info(f"Created job {job_id} for {file_path}")
+        return job
+        
+    async def add_to_queue(self, queue_name: str, job_id: str):
+        """Add job to queue"""
+        await self.redis_client.lpush(queue_name, job_id)
+        
+    async def get_job(self, job_id: str) -> Optional[TranslationJob]:
+        """Get job by ID"""
+        job_key = f"{self.JOB_KEY_PREFIX}{job_id}"
+        data = self.redis_client.hgetall(job_key)
+        
+        if not data:
+            return None
+            
+        decoded_data = {
+            k.decode('utf-8'): v.decode('utf-8') 
+            for k, v in data.items()
+        }
+        
+        # Convert string values to appropriate types
+        decoded_data['progress'] = float(decoded_data.get('progress', '0'))
+        decoded_data['total_pages'] = int(decoded_data.get('total_pages', '0'))
+        decoded_data['processed_pages'] = int(decoded_data.get('processed_pages', '0'))
+        
+        return TranslationJob.from_dict(decoded_data)
+        
+    async def update_job(self, job: TranslationJob):
+        """Update job in Redis"""
+        job.updated_at = datetime.now()
+        job_key = f"{self.JOB_KEY_PREFIX}{job.job_id}"
+        
+        self.redis_client.hset(
+            job_key,
+            mapping=job.to_dict()
+        )
+        
+    async def update_job_progress(
+        self,
+        job_id: str,
+        progress: float,
+        processed_pages: int = None
+    ):
+        """Update job progress"""
+        job = await self.get_job(job_id)
+        if job:
+            job.progress = progress
+            if processed_pages:
+                job.processed_pages = processed_pages
+            await self.update_job(job)
+            
+    async def fail_job(self, job_id: str, error: str):
+        """Mark job as failed"""
+        job = await self.get_job(job_id)
+        if job:
+            job.status = JobStatus.FAILED
+            job.error = error
+            await self.update_job(job)
+            
+    async def complete_job(self, job_id: str, output_file: str):
+        """Mark job as completed"""
+        job = await self.get_job(job_id)
+        if job:
+            job.status = JobStatus.COMPLETED
+            job.output_file = output_file
+            job.progress = 100.0
+            await self.update_job(job)
+            
+    async def get_queue_status(self) -> Dict[str, int]:
+        """Get status of all queues"""
+        return {
+            "extract": self.redis_client.llen(self.EXTRACT_QUEUE),
+            "chunk": self.redis_client.llen(self.CHUNK_QUEUE),
+            "translate": self.redis_client.llen(self.TRANSLATE_QUEUE),
+            "reconstruct": self.redis_client.llen(self.RECONSTRUCT_QUEUE)
+        }
+        
+    async def get_active_jobs(self, limit: int = 10) -> List[TranslationJob]:
+        """Get active jobs"""
+        pattern = f"{self.JOB_KEY_PREFIX}*"
+        job_keys = self.redis_client.keys(pattern)
+        
+        jobs = []
+        for key in job_keys[:limit]:
+            job_id = key.decode('utf-8').replace(self.JOB_KEY_PREFIX, '')
+            job = await self.get_job(job_id)
+            if job and job.status != JobStatus.COMPLETED:
+                jobs.append(job)
+                
+        return sorted(jobs, key=lambda j: j.created_at, reverse=True)
+
+
+class WorkerCoordinator:
+    """
+    Coordinates workers for different stages
+    """
+    
+    def __init__(self, queue_manager: QueueManager):
+        self.queue_manager = queue_manager
+        self.workers = {}
+        
+    async def start_extraction_worker(self):
+        """Start extraction worker"""
+        from ...modules.extraction.v2.streaming_extractor import StreamingPDFExtractor
+        
+        extractor = StreamingPDFExtractor()
+        
+        while True:
+            try:
+                job_id = self.queue_manager.redis_client.brpop(
+                    self.queue_manager.EXTRACT_QUEUE,
+                    timeout=5
+                )
+                
+                if not job_id:
+                    await asyncio.sleep(1)
+                    continue
+                    
+                job_id = job_id[1].decode('utf-8')
+                job = await self.queue_manager.get_job(job_id)
+                
+                if not job:
+                    continue
+                    
+                job.status = JobStatus.EXTRACTING
+                await self.queue_manager.update_job(job)
+                
+                logger.info(f"Starting extraction for job {job_id}")
+                
+                output_file = None
+                async for batch in extractor.process_streaming(job.file_path):
+                    if batch.get("status") == "completed":
+                        output_file = batch["output_file"]
+                        job.total_pages = batch["total_pages"]
+                    elif "progress" in batch:
+                        await self.queue_manager.update_job_progress(
+                            job_id,
+                            batch["progress"] * 0.25
+                        )
+                        
+                if output_file:
+                    job.extraction_file = output_file
+                    job.status = JobStatus.CHUNKING
+                    await self.queue_manager.update_job(job)
+                    
+                    await self.queue_manager.add_to_queue(
+                        self.queue_manager.CHUNK_QUEUE,
+                        job_id
+                    )
+                else:
+                    await self.queue_manager.fail_job(job_id, "Extraction failed")
+                    
+            except Exception as e:
+                logger.error(f"Extraction worker error: {e}")
+                if 'job_id' in locals():
+                    await self.queue_manager.fail_job(job_id, str(e))
+    
+    async def start_chunking_worker(self):
+        """Process chunking queue - simply move to translation"""
+        while True:
+            try:
+                job_id = self.queue_manager.redis_client.brpop(
+                    self.queue_manager.CHUNK_QUEUE,
+                    timeout=5
+                )
+                
+                if not job_id:
+                    await asyncio.sleep(1)
+                    continue
+                    
+                job_id = job_id[1].decode('utf-8')
+                job = await self.queue_manager.get_job(job_id)
+                
+                if not job:
+                    continue
+                    
+                # For now, just move to translation queue
+                job.status = JobStatus.TRANSLATING
+                await self.queue_manager.update_job(job)
+                
+                await self.queue_manager.add_to_queue(
+                    self.queue_manager.TRANSLATE_QUEUE,
+                    job_id
+                )
+                
+                logger.info(f"Moved job {job_id} from chunking to translation")
+                
+            except Exception as e:
+                logger.error(f"Chunking worker error: {e}")
+                    
+    async def start_translation_worker(self):
+        """Start translation worker"""
+        from ...services.translation_service_chunked import ChunkedTranslationService
+        
+        translator = ChunkedTranslationService()
+        
+        while True:
+            try:
+                job_id = self.queue_manager.redis_client.brpop(
+                    self.queue_manager.TRANSLATE_QUEUE,
+                    timeout=5
+                )
+                
+                if not job_id:
+                    await asyncio.sleep(1)
+                    continue
+                    
+                job_id = job_id[1].decode('utf-8')
+                job = await self.queue_manager.get_job(job_id)
+                
+                if not job or not job.extraction_file:
+                    continue
+                    
+                job.status = JobStatus.TRANSLATING
+                await self.queue_manager.update_job(job)
+                
+                logger.info(f"Starting translation for job {job_id}")
+                
+                with open(job.extraction_file, 'r', encoding='utf-8') as f:
+                    lines = f.readlines()
+                    
+                translated_lines = []
+                total_lines = len(lines)
+                
+                for i, line in enumerate(lines):
+                    batch_data = json.loads(line)
+                    
+                    text_content = []
+                    for page in batch_data.get("content", []):
+                        for element in page.get("elements", []):
+                            if element["type"] == "text":
+                                text_content.append(element["content"])
+                                
+                    if text_content:
+                        text = "\n".join(text_content)
+                        result = await translator.translate_long_document(
+                            text,
+                            job.source_lang,
+                            job.target_lang,
+                            job.tier
+                        )
+                        
+                        if result["success"]:
+                            batch_data["translated_text"] = result["translated_text"]
+                            
+                    translated_lines.append(json.dumps(batch_data, ensure_ascii=False))
+                    
+                    progress = 25 + ((i + 1) / total_lines) * 50
+                    await self.queue_manager.update_job_progress(job_id, progress)
+                    
+                translation_file = job.extraction_file.replace('.jsonl', '_translated.jsonl')
+                with open(translation_file, 'w', encoding='utf-8') as f:
+                    f.write('\n'.join(translated_lines))
+                    
+                job.translation_file = translation_file
+                job.status = JobStatus.RECONSTRUCTING
+                await self.queue_manager.update_job(job)
+                
+                await self.queue_manager.add_to_queue(
+                    self.queue_manager.RECONSTRUCT_QUEUE,
+                    job_id
+                )
+                
+            except Exception as e:
+                logger.error(f"Translation worker error: {e}")
+                if 'job_id' in locals():
+                    await self.queue_manager.fail_job(job_id, str(e))
+    
+    async def start_reconstruction_worker(self):
+        """Process reconstruction queue - for now just complete the job"""
+        while True:
+            try:
+                job_id = self.queue_manager.redis_client.brpop(
+                    self.queue_manager.RECONSTRUCT_QUEUE,
+                    timeout=5
+                )
+                
+                if not job_id:
+                    await asyncio.sleep(1)
+                    continue
+                    
+                job_id = job_id[1].decode('utf-8')
+                job = await self.queue_manager.get_job(job_id)
+                
+                if not job or not job.translation_file:
+                    continue
+                    
+                logger.info(f"Processing reconstruction for job {job_id}")
+                
+                # For now, just mark as completed with the translation file
+                # In future, this would create a PDF
+                await self.queue_manager.complete_job(job_id, job.translation_file)
+                
+                logger.info(f"Job {job_id} completed!")
+                
+            except Exception as e:
+                logger.error(f"Reconstruction worker error: {e}")
+                if 'job_id' in locals():
+                    await self.queue_manager.fail_job(job_id, str(e))
+                    
+    async def start_all_workers(self, num_workers: Dict[str, int] = None):
+        """Start all workers"""
+        if not num_workers:
+            num_workers = {
+                "extraction": 2,
+                "translation": 4,
+                "reconstruction": 1
+            }
+            
+        tasks = []
+        
+        # Start extraction workers
+        for _ in range(num_workers["extraction"]):
+            tasks.append(asyncio.create_task(self.start_extraction_worker()))
+        
+        # Start chunking worker
+        tasks.append(asyncio.create_task(self.start_chunking_worker()))
+            
+        # Start translation workers
+        for _ in range(num_workers["translation"]):
+            tasks.append(asyncio.create_task(self.start_translation_worker()))
+        
+        # Start reconstruction worker
+        if num_workers.get("reconstruction", 0) > 0:
+            tasks.append(asyncio.create_task(self.start_reconstruction_worker()))
+            
+        logger.info(f"Started {len(tasks)} workers")
+        
+        await asyncio.gather(*tasks)

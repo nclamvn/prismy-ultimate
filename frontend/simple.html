@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>PRISMY Simple Test</title>
+</head>
+<body>
+    <h1>PRISMY Translation - Simple Version</h1>
+    
+    <input type="file" id="file" accept=".pdf">
+    <button onclick="translatePDF()">Translate</button>
+    
+    <h3>Original:</h3>
+    <pre id="original"></pre>
+    
+    <h3>Translation:</h3>
+    <pre id="translated"></pre>
+    
+    <script>
+    async function translatePDF() {
+        const file = document.getElementById('file').files[0];
+        if (!file) return alert('Choose file');
+        
+        const formData = new FormData();
+        formData.append('file', file);
+        
+        const response = await fetch('http://localhost:8000/translate', {
+            method: 'POST',
+            body: formData
+        });
+        
+        const data = await response.json();
+        document.getElementById('original').textContent = data.original;
+        document.getElementById('translated').textContent = data.translated;
+    }
+    </script>
+</body>
+</html>
