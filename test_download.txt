@@ -1,0 +1,8 @@
+[MOCK-TRANSLATED to Vietnamese]: prismy test document
+[MOCK-TRANSLATED to Vietnamese]: this là a test document cho prismy translation system.
+[MOCK-TRANSLATED to Vietnamese]: đây là văn bản tiếng việt để test dịch thuật.
+[MOCK-TRANSLATED to Vietnamese]: english paragraph: các quick brown fox jumps over các lazy dog.
+[MOCK-TRANSLATED to Vietnamese]: vietnamese paragraph: con cáo nâu nhanh nhẹn nhảy qua con chó lười biếng.
+[MOCK-TRANSLATED to Vietnamese]: english	vietnamese
+hello	xin chào
+goodbye	tạm biệt

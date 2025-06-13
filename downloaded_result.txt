@@ -1,0 +1,3 @@
+
+--- Page 1 ---
+Đây là một tài liệu thử nghiệm cho dịch vụ dịch thuật cấp Premium. Chúng tôi sẽ kiểm tra xem lỗi Redis WRONGTYPE đã được khắc phục hoàn toàn hay chưa.

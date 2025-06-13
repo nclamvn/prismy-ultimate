@@ -1,0 +1,16 @@
+
+--- Page 1 ---
+Trí tuệ nhân tạo và Học máy
+
+Trí tuệ nhân tạo (AI) là trí tuệ được thể hiện bởi các máy móc, trái ngược với trí tuệ tự nhiên được thể hiện bởi con người và động vật. Các sách giáo khoa hàng đầu về AI định nghĩa lĩnh vực này là nghiên cứu về "các tác nhân thông minh": bất kỳ thiết bị nào cảm nhận môi trường của nó và thực hiện các hành động tối đa hóa cơ hội thành công trong việc đạt được mục tiêu của nó.
+
+Học máy (ML) là nghiên cứu về các thuật toán máy tính cải thiện tự động thông qua kinh nghiệm và việc sử dụng dữ liệu. Nó được coi là một phần của trí tuệ nhân tạo. Các thuật toán học máy xây dựng một mô hình dựa trên dữ liệu mẫu, được gọi là "dữ liệu huấn luyện", nhằm đưa ra dự đoán hoặc quyết định mà không cần được lập trình rõ ràng để làm như vậy.
+
+Các ứng dụng của AI bao gồm:
+- Xử lý ngôn ngữ tự nhiên
+- Thị giác máy tính
+- Robot
+- Hệ thống chuyên gia
+- Nhận diện giọng nói
+
+Tương lai của AI tươi sáng và đầy khả năng!

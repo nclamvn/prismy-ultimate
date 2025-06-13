@@ -1,0 +1,81 @@
+TRANSLATED DOCUMENT
+==================================================
+
+[MOCK-TRANSLATED to pdf]: Báº£n dá»ch tÃ i liá»u
+
+[MOCK-TRANSLATED to pdf]: Báº£n quyá»n Â© Äáº¡i há»c Stanford
+
+ÄÃNH GIÃ CÃC á»¨NG Dá»¤NG AI TRONG CHÄM SÃC Sá»¨C KHá»E
+
+TÃC GIáº¢: MILDRED CHO
+
+CÃC THá»°C HÃNH Äáº O Äá»¨C Tá»T NHáº¤T â HÃNH THÃNH Váº¤N Äá»
+
+[MOCK-TRANSLATED to pdf]: Trong pháº§n nÃ y, chÃºng ta sáº½ tÃ¬m hiá»u vá» cÃ¡c hÃ nh Äá»ng cá»¥ thá» ÄÃ£ ÄÆ°á»£c khuyáº¿n nghá» nhÆ° lÃ  cÃ¡c thá»±c hÃ nh Äáº¡o Äá»©c tá»t nháº¥t trong viá»c phÃ¡t triá»n vÃ  triá»n khai AI dá»±a trÃªn há»c mÃ¡y trong cÃ¡c á»©ng dá»¥ng chÄm sÃ³c sá»©c khá»e. Suy nghÄ© cá»§a chÃºng ta vá» cÃ¡c thá»±c hÃ nh Äáº¡o Äá»©c tá»t nháº¥t sáº½ báº¯t Äáº§u tá»« giai Äoáº¡n hÃ¬nh thÃ nh váº¥n Äá» vÃ  xÃ¡c Äá»nh má»¥c ÄÃ­ch cá»§a há» thá»ng AI mÃ  báº¡n muá»n phÃ¡t triá»n. TrÆ°á»c tiÃªn, liá»u Ã½ Äá»nh cÃ³ Äáº¡o Äá»©c khÃ´ng, liá»u má»¥c ÄÃ­ch cá»§a nÃ³ cÃ³ nháº±m nÃ¢ng cao sá»©c khá»e vÃ  phÃºc lá»£i cá»§a bá»nh nhÃ¢n khÃ´ng? Ngay cáº£ khi má»¥c ÄÃ­ch dá»± kiáº¿n cÃ³ váº» Äáº¡o Äá»©c, liá»u cÃ³ thá» cÃ³ háº­u quáº£ tiÃªu cá»±c náº¿u bá» láº¡m dá»¥ng khÃ´ng? NgÃ y cÃ ng nhiá»u nhÃ  khoa há»c dá»¯ liá»u Äang thÃ¡ch thá»©c má»¥c ÄÃ­ch vÃ  cÃ¡ch sá»­ dá»¥ng cÃ¡c sáº£n pháº©m mÃ  há» Äang phÃ¡t triá»n, cho dÃ¹ má»¥c ÄÃ­ch lÃ  nháº¯m má»¥c tiÃªu quáº£ng cÃ¡o Äáº¿n cÃ¡ nhÃ¢n thÃ´ng qua máº¡ng xÃ£ há»i, hay xÃ¡c Äá»nh cÃ¡ nhÃ¢n thÃ´ng qua cÃ¡c thuáº­t toÃ¡n nháº­n diá»n khuÃ´n máº·t.
+
+[MOCK-TRANSLATED to pdf]: VÃ­ dá»¥, Hiá»p há»i MÃ¡y tÃ­nh, má»t trong nhá»¯ng tá» chá»©c chuyÃªn nghiá»p hÃ ng Äáº§u cá»§a cÃ¡c nhÃ  khoa há»c mÃ¡y tÃ­nh, ÄÃ£ kÃªu gá»i táº¡m ngá»«ng sá»­ dá»¥ng cÃ¡c cÃ´ng nghá» nháº­n diá»n khuÃ´n máº·t vÃ¬ tiá»m nÄng tÃ¡c Äá»ng Äá»nh kiáº¿n Äáº¿n quyá»n con ngÆ°á»i vÃ  phÃ¡p lÃ½. Hiá»p há»i cÅ©ng kháº³ng Äá»nh ráº±ng cÃ¡c nhÃ  phÃ¡t triá»n vÃ  váº­n hÃ nh, cÅ©ng nhÆ° ngÆ°á»i sá»­ dá»¥ng cÃ´ng nghá» nháº­n diá»n khuÃ´n máº·t pháº£i chá»u trÃ¡ch nhiá»m vá» viá»c sá»­ dá»¥ng vÃ  láº¡m dá»¥ng cÃ¡c há» thá»ng nÃ y. Máº·c dÃ¹ ÄÃ¢y cÃ³ thá» lÃ  nhá»¯ng cÃ¢u há»i dÆ°á»ng nhÆ° khÃ´ng cáº§n pháº£i há»i trong bá»i cáº£nh AI chÄm sÃ³c sá»©c khá»e vÃ¬ cÃ¢u tráº£ lá»i ÄÃ£ rÃµ rÃ ng, nhÆ°ng chÃºng Äáº·c biá»t quan trá»ng Äá»i vá»i AI ÄÆ°á»£c phÃ¡t triá»n bá»i cÃ¡c nhÃ³m cÃ³ lá»£i Ã­ch xung Äá»t hoáº·c cáº¡nh tranh. CÃ¡c bá»i cáº£nh chÄm sÃ³c sá»©c khá»e Äáº§y ráº«y nhá»¯ng lá»£i Ã­ch cáº¡nh tranh nhÆ° váº­y vÃ¬ há» hoáº¡t Äá»ng dÆ°á»i nhá»¯ng háº¡n cháº¿ vá» nguá»n lá»±c, bao gá»m háº¡n cháº¿ vá» tÃ i chÃ­nh, nhÃ¢n sá»±, thiáº¿t bá» vÃ  váº­t tÆ°, chÆ°a ká» Äáº¿n cÃ¡c Äá»ng cÆ¡ tÃ i chÃ­nh Äá» cáº£i thiá»n chÄm sÃ³c.
+
+[MOCK-TRANSLATED to pdf]: CÃ¹ng nhau, nhá»¯ng lá»£i Ã­ch vÃ  Äá»ng cÆ¡ nÃ y táº¡o ra Ã¡p lá»±c Äá» trÃ¡nh má»t sá» loáº¡i bá»nh nhÃ¢n nháº¥t Äá»nh, hoáº·c trÃ¡nh cung cáº¥p má»t sá» loáº¡i Äiá»u trá» nháº¥t Äá»nh. CÃ¡c nhÃ  phÃ¡t triá»n AI pháº£i cáº£nh giÃ¡c vá» viá»c giáº£m thiá»u xung Äá»t lá»£i Ã­ch. NhÆ°ng lÃ m tháº¿ nÃ o? ChÃºng ta sáº½ nÃ³i vá» Äiá»u nÃ y cá»¥ thá» hÆ¡n, nhÆ°ng trÆ°á»c tiÃªn, hÃ£y xem xÃ©t váº¥n Äá» hÃ¬nh thÃ nh váº¥n Äá».
+
+[MOCK-TRANSLATED to pdf]: Báº£n quyá»n Â© Äáº¡i há»c Stanford
+
+ÄÃNH GIÃ CÃC á»¨NG Dá»¤NG AI TRONG CHÄM SÃC Sá»¨C KHá»E
+
+TÃC GIáº¢: MILDRED CHO
+
+CÃC THá»°C HÃNH Äáº O Äá»¨C Tá»T NHáº¤T â HÃNH THÃNH Váº¤N Äá»
+
+[MOCK-TRANSLATED to pdf]: HÃ¬nh thÃ nh váº¥n Äá» AI liÃªn quan Äáº¿n viá»c chuyá»n Äá»i má»t má»¥c tiÃªu cáº¥p cao nhÆ° "cáº£i thiá»n chÄm sÃ³c bá»nh nhÃ¢n" thÃ nh cÃ¡c cÃ¢u há»i cÃ³ thá» hÃ nh Äá»ng ÄÆ°á»£c mÃ  cÃ³ thá» ÄÆ°á»£c tráº£ lá»i báº±ng dá»¯ liá»u cÃ³ sáºµn. ThÃ¡ch thá»©c lÃ  cÃ¡c cÃ¢u há»i cÃ³ thá» hÃ nh Äá»ng ÄÆ°á»£c vÃ  dá»¯ liá»u cÃ³ sáºµn thÆ°á»ng bá» giá»i háº¡n, vÃ¬ váº­y nhiá»u Äiá»u cÃ³ thá» bá» máº¥t trong quÃ¡ trÃ¬nh chuyá»n Äá»i, vÃ  cÃ¡c háº¡n cháº¿ thá»±c táº¿ vá» hÃ¬nh thÃ nh váº¥n Äá» cÃ³ thá» dáº«n Äáº¿n cÃ¡c lá»i vÃ  thiÃªn kiáº¿n khÃ´ng ÄÆ°á»£c phÃ¡t hiá»n. Má»t nhiá»m vá»¥ khÃ¡ phá» biáº¿n vÃ  cÃ³ váº» ÄÆ¡n giáº£n nhÆ° phÃ¢n táº§ng rá»§i ro thÆ°á»ng gáº·p nhiá»u khÃ³ khÄn vÃ¬ rá»§i ro cÃ³ thá» ÄÆ°á»£c Äá»nh nghÄ©a theo nhiá»u cÃ¡ch khÃ¡c nhau, vÃ  thÆ°á»ng lÃ  theo nhá»¯ng cÃ¡ch khÃ´ng ÄÆ°á»£c Äo lÆ°á»ng trá»±c tiáº¿p mÃ  thÃ´ng qua cÃ¡c biáº¿n Äáº¡i diá»n.
+
+[MOCK-TRANSLATED to pdf]: ChÃºng ta ÄÃ£ tháº¥y ráº±ng viá»c sá»­ dá»¥ng chi phÃ­ chÄm sÃ³c sá»©c khá»e nhÆ° má»t Äáº¡i diá»n cho rá»§i ro hoáº·c nhu cáº§u chÄm sÃ³c sá»©c khá»e ÄÃ£ dáº«n Äáº¿n thiÃªn kiáº¿n chá»§ng tá»c vÃ¬ cÃ¡c Äiá»m sá» rá»§i ro ÄÆ°á»£c táº¡o ra tá»« cÃ¡c mÃ´ hÃ¬nh dá»± ÄoÃ¡n dá»±a trÃªn chi phÃ­ ÄÃ£ ÄÃ¡nh giÃ¡ tháº¥p nhu cáº§u chÄm sÃ³c sá»©c khá»e cá»§a ngÆ°á»i da Äen so vá»i ngÆ°á»i da tráº¯ng cÃ³ cÃ¹ng Äiá»m sá» rá»§i ro. May máº¯n thay, thiÃªn kiáº¿n nhÆ° váº­y cÃ³ thá» ÄÆ°á»£c kiá»m tra, Ã­t nháº¥t lÃ  Äá»i vá»i cÃ¡c biáº¿n mÃ  báº¡n nghi ngá» cÃ³ thiÃªn kiáº¿n tiá»m áº©n nhÆ° chá»§ng tá»c hoáº·c giá»i tÃ­nh. Trong vÃ­ dá»¥ nÃ y, báº¡n sáº½ xem xÃ©t liá»u má»i quan há» giá»¯a cÃ¡c Äiá»m sá» rá»§i ro ÄÆ°á»£c táº¡o ra bá»i mÃ´ hÃ¬nh vÃ  biáº¿n quan tÃ¢m, nhu cáº§u sá»©c khá»e, cÃ³ khÃ¡c biá»t theo chá»§ng tá»c hay khÃ´ng. TÆ°Æ¡ng tá»±, phÃ¢n táº§ng rá»§i ro trÃªn cÆ¡ sá» chi phÃ­ nhÆ° má»t Äáº¡i diá»n cho nhu cáº§u sá»©c khá»e cÃ³ xu hÆ°á»ng thiÃªn vá» ngÆ°á»i cao tuá»i vá»i cÃ¡c tÃ¬nh tráº¡ng mÃ£n tÃ­nh phá»©c táº¡p vÃ o cuá»i Äá»i, khi háº§u háº¿t cÃ¡c chi phÃ­ chÄm sÃ³c sá»©c khá»e phÃ¡t sinh, vÃ  chá»ng láº¡i tráº» em vá»i cÃ¡c tÃ¬nh tráº¡ng cáº¥p tÃ­nh, cÃ³ thá» gÃ¢y tá»­ vong nhÆ°ng cÃ³ thá» Äiá»u trá» ÄÆ°á»£c.
+
+[MOCK-TRANSLATED to pdf]: Náº¿u cÃ¢u há»i cáº§n ÄÆ°á»£c tráº£ lá»i lÃ  "ai cáº§n chÄm sÃ³c nhiá»u nháº¥t" thÃ¬ Äiá»u quan trá»ng lÃ  pháº£i nhá» ráº±ng cÃ¢u há»i nÃ y khÃ´ng chá» ÄÆ¡n thuáº§n lÃ  Äá»nh lÆ°á»£ng mÃ  cÃ²n lÃ  má»t cÃ¢u há»i vá» giÃ¡ trá» ÄÃ²i há»i sá»± tinh táº¿. "ChÄm sÃ³c" ÄÆ°á»£c Äá»nh nghÄ©a nhÆ° tháº¿ nÃ o? CÃ¢u há»i cÃ³ phÃ¢n biá»t giá»¯a chÄm sÃ³c cáº¥p tÃ­nh vÃ  mÃ£n tÃ­nh khÃ´ng? "Nhu cáº§u" ÄÆ°á»£c Äá»nh nghÄ©a nhÆ° tháº¿ nÃ o? Náº¿u bá»nh nhÃ¢n cÃ³ cÃ¡c tÃ¬nh tráº¡ng khÃ´ng thá» Äiá»u trá» vÃ  do ÄÃ³ thÆ°á»ng khÃ´ng nháº­n ÄÆ°á»£c chÄm sÃ³c tá»n kÃ©m, Äiá»u ÄÃ³ cÃ³ nghÄ©a lÃ  mÃ´ hÃ¬nh nÃªn gÃ¡n cho há» Äiá»m sá» rá»§i ro tháº¥p, hay há» khÃ´ng cáº§n chÄm sÃ³c? CÃ¡c cÃ¢u há»i cáº§n Äáº·t ra trong viá»c hÃ¬nh thÃ nh váº¥n Äá»:
+
+[MOCK-TRANSLATED to pdf]: Báº£n quyá»n Â© Äáº¡i há»c Stanford
+
+ÄÃNH GIÃ CÃC á»¨NG Dá»¤NG AI TRONG CHÄM SÃC Sá»¨C KHá»E
+
+TÃC GIáº¢: MILDRED CHO
+
+CÃC THá»°C HÃNH Äáº O Äá»¨C Tá»T NHáº¤T â HÃNH THÃNH Váº¤N Äá»
+
+- Má»¥c ÄÃ­ch cá»§a há» thá»ng AI cÃ³ nháº±m nÃ¢ng cao sá»©c khá»e vÃ  phÃºc lá»£i cá»§a bá»nh nhÃ¢n khÃ´ng?
+- Liá»u cÃ³ thá» cÃ³ háº­u quáº£ khÃ´ng mong muá»n náº¿u bá» láº¡m dá»¥ng khÃ´ng?
+- Ã Äá»nh cá»§a há» thá»ng lÃ  gÃ¬ â Äá» xÃ¡c Äá»nh, phÃ¢n loáº¡i, dá»± ÄoÃ¡n?
+- Äiá»u gÃ¬ Äang ÄÆ°á»£c xÃ¡c Äá»nh, phÃ¢n loáº¡i hoáº·c dá»± ÄoÃ¡n?
+  o VÃ­ dá»¥: rá»§i ro, bá»nh táº­t, tiÃªn lÆ°á»£ng, chi phÃ­, sá»­ dá»¥ng chÄm sÃ³c sá»©c khá»e, nháº­p viá»n hoáº·c tÃ¡i nháº­p viá»n, hiá»u quáº£ Äiá»u trá», suy giáº£m
+- Nhá»¯ng thuáº­t ngá»¯ nÃ y ÄÆ°á»£c Äá»nh nghÄ©a nhÆ° tháº¿ nÃ o?
+
+[MOCK-TRANSLATED to pdf]: LiÃªn quan cháº·t cháº½ Äáº¿n viá»c hÃ¬nh thÃ nh váº¥n Äá» lÃ  lá»±a chá»n dá»¯ liá»u. Táº¥t nhiÃªn, dá»¯ liá»u ÄÃ£ cÃ³ sáºµn lÃ  dá» sá»­ dá»¥ng nháº¥t. NhÆ°ng Äiá»u ÄÃ³ khÃ´ng cÃ³ nghÄ©a lÃ  ÄÃ¢y lÃ  dá»¯ liá»u ÄÃºng. VÃ­ dá»¥, há» sÆ¡ sá»©c khá»e Äiá»n tá»­ cÃ³ thá» phong phÃº nhÆ°ng thiáº¿u nhiá»u thÃ´ng tin cÃ³ thá» quan trá»ng Äá»i vá»i cÃ¡c mÃ´ hÃ¬nh dá»± ÄoÃ¡n, cháº³ng háº¡n nhÆ° phÆ¡i nhiá»m mÃ´i trÆ°á»ng, cháº¿ Äá» Än uá»ng, hoáº·c cÃ¡c yáº¿u tá» kinh táº¿ xÃ£ há»i, táº¥t cáº£ Äá»u ÄÆ°á»£c biáº¿t lÃ  ráº¥t quyáº¿t Äá»nh Äáº¿n sá»©c khá»e vÃ  bá»nh táº­t. Há» sÆ¡ sá»©c khá»e Äiá»n tá»­ tá»« má»t bá»nh viá»n hoáº·c há» thá»ng y táº¿, hoáº·c dá»¯ liá»u yÃªu cáº§u báº£o hiá»m cÅ©ng thÆ°á»ng khÃ´ng cung cáº¥p má»t dÃ²ng thá»i gian dá»¯ liá»u liÃªn tá»¥c cho má»t bá»nh nhÃ¢n theo thá»i gian vÃ¬ bá»nh nhÃ¢n thÆ°á»ng di chuyá»n giá»¯a cÃ¡c nhÃ  cung cáº¥p dá»ch vá»¥ y táº¿ vÃ  cÃ¡c nhÃ  báº£o hiá»m. VÃ  dá»±a vÃ o dá»¯ liá»u tá»« má»t thá»i Äiá»m duy nháº¥t cÃ³ thá» gÃ¢y hiá»u láº§m. Máº·t khÃ¡c, nhÃ³m dá»¯ liá»u láº¡i cÃ³ thá» che giáº¥u cÃ¡c mÃ´ hÃ¬nh quan trá»ng.
+
+[MOCK-TRANSLATED to pdf]: Trong vÃ­ dá»¥ cá»§a chÃºng ta vá» phÃ¢n táº§ng rá»§i ro, má»t mÃ´ hÃ¬nh ÄÆ°á»£c ÄÃ o táº¡o trÃªn dá»¯ liá»u tá»« nhá»¯ng ngÆ°á»i thuá»c nhiá»u Äá» tuá»i khÃ¡c nhau cÃ³ thá» che giáº¥u cÃ¡c mÃ´ hÃ¬nh trong dá»¯ liá»u tá»« má»t nhÃ³m dÃ¢n sá» phá»¥, cháº³ng háº¡n nhÆ° nhá»¯ng ngÆ°á»i tráº» tuá»i. Táº¥t nhiÃªn, kiáº¿n thá»©c chi tiáº¿t vá» sá»± khÃ¡c biá»t giá»¯a cÃ¡c nhÃ³m dÃ¢n sá» phá»¥ lÃ  cáº§n thiáº¿t Äá» biáº¿t liá»u cÃ³ cáº§n cÃ¡c mÃ´ hÃ¬nh tÃ¹y chá»nh hay khÃ´ng. LÃ m tháº¿ nÃ o Äá» biáº¿t Äiá»u nÃ y trÆ°á»c? CÃ¡c cÃ¢u há»i cáº§n Äáº·t ra vá» dá»¯ liá»u:
+
+[MOCK-TRANSLATED to pdf]: Báº£n quyá»n Â© Äáº¡i há»c Stanford
+
+ÄÃNH GIÃ CÃC á»¨NG Dá»¤NG AI TRONG CHÄM SÃC Sá»¨C KHá»E
+
+TÃC GIáº¢: MILDRED CHO
+
+CÃC THá»°C HÃNH Äáº O Äá»¨C Tá»T NHáº¤T â HÃNH THÃNH Váº¤N Äá»
+
+- Má»¥c ÄÃ­ch cá»§a há» thá»ng AI cÃ³ nháº±m nÃ¢ng cao sá»©c khá»e vÃ  phÃºc lá»£i cá»§a bá»nh nhÃ¢n khÃ´ng?
+- Liá»u cÃ³ thá» cÃ³ háº­u quáº£ khÃ´ng mong muá»n náº¿u bá» láº¡m dá»¥ng khÃ´ng?
+- Ã Äá»nh cá»§a há» thá»ng lÃ  gÃ¬ â Äá» xÃ¡c Äá»nh, phÃ¢n loáº¡i, dá»± ÄoÃ¡n?
+- Äiá»u gÃ¬ Äang ÄÆ°á»£c xÃ¡c Äá»nh, phÃ¢n loáº¡i hoáº·c dá»± ÄoÃ¡n?
+  o VÃ­ dá»¥: rá»§i ro, bá»nh táº­t, tiÃªn lÆ°á»£ng, chi phÃ­, sá»­ dá»¥ng chÄm sÃ³c sá»©c khá»e, nháº­p viá»n hoáº·c tÃ¡i nháº­p viá»n, hiá»u quáº£ Äiá»u trá», suy giáº£m
+- Nhá»¯ng thuáº­t ngá»¯ nÃ y ÄÆ°á»£c Äá»nh nghÄ©a nhÆ° tháº¿ nÃ o?
+
+[MOCK-TRANSLATED to pdf]: - CÃ¡c biáº¿n trong mÃ´ hÃ¬nh ÄÆ°á»£c Äáº¡i diá»n tá»t nhÆ° tháº¿ nÃ o bá»i dá»¯ liá»u cÃ³ sáºµn?
+- CÃ³ Äang sá»­ dá»¥ng cÃ¡c biá»n phÃ¡p Äáº¡i diá»n khÃ´ng?
+- CÃ³ nhá»¯ng biáº¿n quan trá»ng nÃ o cÃ³ kháº£ nÄng liÃªn quan Äáº¿n cÃ¡c biá»n phÃ¡p káº¿t quáº£ chÃ­nh mÃ  khÃ´ng ÄÆ°á»£c Äáº¡i diá»n trong dá»¯ liá»u cÃ³ sáºµn khÃ´ng?
+- CÃ³ kháº£ nÄng cÃ³ sá»± khÃ¡c biá»t giá»¯a cÃ¡c nhÃ³m dÃ¢n sá» phá»¥ trong cÃ¡c káº¿t quáº£ chÃ­nh, Äáº·c biá»t lÃ  theo cÃ¡c Äáº·c Äiá»m ÄÆ°á»£c báº£o vá» há»£p phÃ¡p nhÆ° tuá»i tÃ¡c, chá»§ng tá»c, dÃ¢n tá»c, hoáº·c giá»i tÃ­nh, hoáº·c cÃ¡c Äáº·c Äiá»m quan trá»ng vá» máº·t xÃ£ há»i nhÆ° thu nháº­p vÃ  giÃ¡o dá»¥c khÃ´ng?
+
+[MOCK-TRANSLATED to pdf]: CÃ¡c thá»±c hÃ nh tá»t nháº¥t chá» ra sá»± cáº§n thiáº¿t pháº£i bao gá»m cÃ¡c bÃ¡c sÄ© thá»±c hÃ nh, nhá»¯ng ngÆ°á»i quen thuá»c sÃ¢u sáº¯c vá»i cÃ¡c nhÃ³m bá»nh nhÃ¢n vÃ  Äiá»u kiá»n liÃªn quan, vÃ  dá»¯ liá»u cáº§n thiáº¿t cho viá»c mÃ´ hÃ¬nh hÃ³a. Há» cáº§n biáº¿t dá»¯ liá»u nÃ o thá»±c sá»± cÃ³ sáºµn, vÃ  nhá»¯ng háº¡n cháº¿ cá»§a dá»¯ liá»u, Äáº·c biá»t lÃ  vá» kháº£ nÄng thiÃªn kiáº¿n. Äiá»u quan trá»ng lÃ  cÃ³ cÃ¡c thÃ nh viÃªn trong nhÃ³m cÃ³ hiá»u biáº¿t vá» nguá»n gá»c cá»§a lá»i há» thá»ng, cháº³ng háº¡n nhÆ° liá»u lá»i cÃ³ ÄÆ°á»£c giá»i thiá»u do thiáº¿u dá»¯ liá»u tá»« cÃ¡c nhÃ³m dÃ¢n sá» phá»¥ cá»¥ thá», thiÃªn kiáº¿n cá»§a bÃ¡c sÄ© (cháº³ng háº¡n nhÆ° kháº£ nÄng tháº¥p hÆ¡n cá»§a phá»¥ ná»¯ máº¯c bá»nh tim Äá» ÄÆ°á»£c cháº©n ÄoÃ¡n bá»nh tim so vá»i nam giá»i), hoáº·c sá»± báº¥t bÃ¬nh Äáº³ng xÃ£ há»i rá»ng hÆ¡n nhÆ° sá»± khÃ¡c biá»t trong viá»c tiáº¿p cáº­n chÄm sÃ³c. ÄÃ³ lÃ  vÃ¬ hiá»u biáº¿t vá» nguá»n gá»c cá»§a lá»i há» thá»ng chá» ra liá»u vÃ  lÃ m tháº¿ nÃ o cÃ¡c mÃ´ hÃ¬nh cÃ³ thá» tÃ­nh Äáº¿n thiÃªn kiáº¿n.
+
+[MOCK-TRANSLATED to pdf]: CÃ¡c thÃ nh viÃªn trong nhÃ³m lÃ  bÃ¡c sÄ© cÃ³ thá» ráº¥t quan trá»ng á» giai Äoáº¡n hÃ¬nh thÃ nh váº¥n Äá», vÃ¬ kiáº¿n thá»©c lÃ¢m sÃ ng sÃ¢u sáº¯c ráº¥t quan trá»ng Äá» hiá»u ÄÆ°á»£c cÃ¡c tÃ¡c Äá»ng cá»§a viá»c Äáº·t cÃ¢u há»i theo má»t cÃ¡ch cá»¥ thá».
+
+[MOCK-TRANSLATED to pdf]: - CÃ¡c biáº¿n trong mÃ´ hÃ¬nh ÄÆ°á»£c Äáº¡i diá»n tá»t nhÆ° tháº¿ nÃ o bá»i dá»¯ liá»u cÃ³ sáºµn?
+- CÃ³ Äang sá»­ dá»¥ng cÃ¡c biá»n phÃ¡p Äáº¡i diá»n khÃ´ng?
+- CÃ³ nhá»¯ng biáº¿n quan trá»ng nÃ o cÃ³ kháº£ nÄng liÃªn quan Äáº¿n cÃ¡c biá»n phÃ¡p káº¿t quáº£ chÃ­nh mÃ  khÃ´ng ÄÆ°á»£c Äáº¡i diá»n trong dá»¯ liá»u cÃ³ sáºµn khÃ´ng?
+- CÃ³ kháº£ nÄng cÃ³ sá»± khÃ¡c biá»t giá»¯a cÃ¡c nhÃ³m dÃ¢n sá» phá»¥ trong cÃ¡c káº¿t quáº£ chÃ­nh, Äáº·c biá»t lÃ  theo cÃ¡c Äáº·c Äiá»m ÄÆ°á»£c báº£o vá» há»£p phÃ¡p nhÆ° tuá»i tÃ¡c, chá»§ng tá»c, dÃ¢n tá»c, hoáº·c giá»i tÃ­nh, hoáº·c cÃ¡c Äáº·c Äiá»m quan trá»ng vá» máº·t xÃ£ há»i nhÆ° thu nháº­p vÃ  giÃ¡o dá»¥c khÃ´ng?
+

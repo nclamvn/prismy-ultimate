@@ -1,0 +1,24 @@
+This is a comprehensive test document designed to trigger potential issues in the PRISMY translation system.
+
+Chapter 1: Introduction
+This document contains multiple paragraphs and sections to ensure the translation system processes multiple chunks properly.
+
+Chapter 2: Technical Details  
+When processing larger documents, the system goes through several phases:
+1. Text extraction from the source document
+2. Chunking the text into manageable pieces
+3. Translation of each chunk using the selected tier
+4. Reconstruction of the final translated document
+
+Chapter 3: Potential Issues
+The reconstruction phase is particularly critical as it needs to:
+- Combine all translated chunks properly
+- Maintain document structure
+- Handle page boundaries correctly
+- Complete the final status update
+
+Chapter 4: Testing Scenarios
+This document should trigger all processing phases and help identify any bottlenecks or stuck conditions at the 90% mark during reconstruction.
+
+Chapter 5: Expected Outcome
+If the system works correctly, this document should be fully translated without getting stuck at any percentage, particularly at the 90% reconstruction phase.

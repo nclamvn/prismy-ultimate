@@ -1,72 +1,57 @@
-import subprocess
-import time
 import os
 import sys
+import subprocess
+import pathlib
+import time
+import signal
 
-def start_services():
-    print("🚀 Starting PRISMY Ultimate Services...")
+ROOT = pathlib.Path(__file__).resolve().parent
+os.environ['PYTHONPATH'] = str(ROOT)
+
+def main():
+    print("🚀 Starting PRISMY Ultimate services...")
     
-    os.environ['PYTHONPATH'] = os.getcwd()
+    processes = []
     
-    print("\n1️⃣ Checking Redis...")
     try:
-        subprocess.run(['redis-cli', 'ping'], check=True, capture_output=True)
-        print("✅ Redis is running")
-    except:
-        print("Starting Redis...")
-        subprocess.Popen(['redis-server', '--daemonize', 'yes'])
+        api_process = subprocess.Popen(
+            [sys.executable, '-m', 'uvicorn', 'src.api.main:app', '--host', '0.0.0.0', '--port', '8000'],
+            cwd=ROOT
+        )
+        processes.append(api_process)
+        print("✅ API server started on port 8000")
+        
         time.sleep(2)
-    
-    print("\n2️⃣ Starting Celery Worker...")
-    celery_worker = subprocess.Popen([
-        sys.executable, '-m', 'celery', '-A', 'celery_app', 'worker',
-        '--loglevel=info',
-        '--pool=solo',
-        '-Q', 'extraction,translation,reconstruction'
-    ])
-    print(f"✅ Celery Worker PID: {celery_worker.pid}")
-    
-    time.sleep(3)
-    
-    print("\n3️⃣ Starting Flower...")
-    flower = subprocess.Popen([
-        sys.executable, '-m', 'celery', '-A', 'celery_app', 'flower',
-        '--port=5555'
-    ])
-    print(f"✅ Flower PID: {flower.pid}")
-    
-    time.sleep(2)
-    
-    print("\n4️⃣ Starting FastAPI...")
-    api = subprocess.Popen([
-        sys.executable, '-m', 'uvicorn', 'src.api.main:app',
-        '--reload', '--host', '0.0.0.0', '--port', '8000'
-    ])
-    print(f"✅ FastAPI PID: {api.pid}")
-    
-    with open('.pids', 'w') as f:
-        f.write(f"{celery_worker.pid}\n")
-        f.write(f"{flower.pid}\n") 
-        f.write(f"{api.pid}\n")
-    
-    print("""
-✅ All services started!
-
-📍 Access points:
-- API: http://localhost:8000
-- API Docs: http://localhost:8000/docs
-- Flower: http://localhost:5555
-
-To stop: python stop_services.py
-""")
-    
-    try:
-        api.wait()
+        
+        worker_process = subprocess.Popen(
+            [sys.executable, '-m', 'celery', '-A', 'celery_app', 'worker', 
+             '--pool=solo', '--concurrency=1',
+             '-Q', 'celery,default,extraction,translation,reconstruction',
+             '--loglevel=INFO'],
+            cwd=ROOT
+        )
+        processes.append(worker_process)
+        print("✅ Celery worker started")
+        
+        redis_process = subprocess.Popen(['redis-server'])
+        processes.append(redis_process)
+        print("✅ Redis server started")
+        
+        print("\n✅ All services started successfully!")
+        print("📡 API: http://localhost:8000")
+        print("📡 Docs: http://localhost:8000/docs")
+        print("\nPress Ctrl+C to stop all services...")
+        
+        for p in processes:
+            p.wait()
+            
     except KeyboardInterrupt:
-        print("\n⏹️ Stopping services...")
-        celery_worker.terminate()
-        flower.terminate()
-        api.terminate()
+        print("\n🛑 Stopping all services...")
+        for p in processes:
+            p.terminate()
+        for p in processes:
+            p.wait()
+        print("✅ All services stopped")
 
 if __name__ == "__main__":
-    start_services()
+    main()

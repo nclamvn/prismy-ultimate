@@ -1,0 +1,334 @@
+"""
+PRISMY Translation API - Production Version
+Fixed CORS and Frontend Integration
+"""
+from fastapi import FastAPI, File, UploadFile, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse, FileResponse
+from fastapi.staticfiles import StaticFiles
+from src.api import celery_endpoints
+import openai
+import os
+import pdfplumber
+import tempfile
+import uuid
+from datetime import datetime
+import logging
+
+from src.api.v1.large_document import router as large_document_router
+
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+app = FastAPI(
+    title="PRISMY Translation API", 
+    version="1.0.0",
+    description="Professional translation service with multiple quality tiers"
+)
+
+# Enhanced CORS configuration for frontend integration
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "http://localhost:3000",
+        "http://127.0.0.1:3000", 
+        "http://localhost:3001",     # ✅ FIXED: Add port 3001 support
+        "http://127.0.0.1:3001",     # ✅ FIXED: Add port 3001 support
+        "http://localhost:8000",
+        "http://127.0.0.1:8000",
+        # Add production domains here
+        # "https://yourdomain.com",
+    ],
+    allow_credentials=True,
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allow_headers=["*"],
+    expose_headers=["*"]
+)
+
+# Add request logging middleware
+@app.middleware("http")
+async def log_requests(request, call_next):
+    start_time = datetime.now()
+    
+    # Log request
+    logger.info(f"🔄 {request.method} {request.url}")
+    
+    response = await call_next(request)
+    
+    # Log response
+    process_time = (datetime.now() - start_time).total_seconds()
+    logger.info(f"✅ {request.method} {request.url} - {response.status_code} ({process_time:.3f}s)")
+    
+    return response
+
+# OpenAI client setup (if needed)
+# openai.api_key = os.getenv("OPENAI_API_KEY")
+
+# Storage for complete translations (in production, use database)
+translation_storage = {}
+
+# Include routers with proper prefixes
+app.include_router(large_document_router, prefix="/api/v1/large", tags=["Large Documents"])
+app.include_router(celery_endpoints.router, prefix="/api/v2", tags=["Async Translation"])
+
+@app.get("/")
+def root():
+    """API root endpoint with service information"""
+    return {
+        "service": "PRISMY Translation API",
+        "version": "1.0.0",
+        "status": "operational",
+        "timestamp": datetime.now().isoformat(),
+        "endpoints": {
+            "large_documents": "/api/v1/large/translate",
+            "async_translation": "/api/v2/translate/pdf/async",
+            "health": "/health",
+            "docs": "/docs",
+            "redoc": "/redoc"
+        },
+        "supported_formats": ["PDF", "TXT", "DOC", "DOCX"],  # ✅ UPDATED: Added Word support
+        "translation_tiers": ["free", "basic", "standard", "premium"],
+        "supported_languages": {
+            "from": ["en", "vi", "zh", "ja", "ko", "fr", "de", "es"],
+            "to": ["en", "vi", "zh", "ja", "ko", "fr", "de", "es"]
+        }
+    }
+
+@app.get("/health")
+def health():
+    """Health check endpoint"""
+    try:
+        # Check Redis connection
+        from src.services.queue.redis_client import get_redis_client
+        redis_client = get_redis_client()
+        redis_status = "healthy" if redis_client.ping() else "unhealthy"
+    except Exception as e:
+        redis_status = f"error: {str(e)}"
+    
+    return {
+        "status": "healthy",
+        "timestamp": datetime.now().isoformat(),
+        "services": {
+            "api": "healthy",
+            "redis": redis_status,
+            "worker": "check with /api/v1/large/queue/status"
+        }
+    }
+
+@app.get("/api/status")
+def api_status():
+    """Detailed API status for frontend"""
+    return {
+        "api_version": "1.0.0",
+        "server_time": datetime.now().isoformat(),
+        "endpoints_available": True,
+        "cors_enabled": True,
+        "translation_service": "active"
+    }
+
+@app.post("/translate")
+async def translate_pdf(file: UploadFile = File(...)):
+    """
+    Extract and translate PDF - Production endpoint
+    Returns complete text, not preview
+    """
+    if not file.filename.endswith('.pdf'):
+        raise HTTPException(
+            status_code=400, 
+            detail={
+                "error": "Only PDF files accepted",
+                "supported_formats": ["PDF"],
+                "received_format": file.filename.split('.')[-1] if '.' in file.filename else "unknown"
+            }
+        )
+    
+    # Generate unique ID for this translation
+    translation_id = str(uuid.uuid4())
+    
+    # Save uploaded file
+    with tempfile.NamedTemporaryFile(delete=False, suffix='.pdf') as tmp:
+        content = await file.read()
+        tmp.write(content)
+        tmp_path = tmp.name
+    
+    try:
+        # Extract complete text
+        full_text = ""
+        total_pages = 0
+        
+        with pdfplumber.open(tmp_path) as pdf:
+            total_pages = len(pdf.pages)
+            for i, page in enumerate(pdf.pages):
+                page_text = page.extract_text()
+                if page_text:
+                    full_text += f"\n--- Page {i+1} ---\n{page_text}\n"
+        
+        if not full_text.strip():
+            raise HTTPException(
+                status_code=400,
+                detail={
+                    "error": "No text found in PDF",
+                    "suggestion": "PDF might be scanned or image-based. Try OCR processing."
+                }
+            )
+        
+        # For now, return extracted text without translation
+        # (OpenAI translation can be added when API key is configured)
+        translated_text = f"[Translation service not configured - API keys needed]\n\nOriginal text:\n{full_text[:500]}..."
+        
+        # Store complete translation
+        translation_storage[translation_id] = {
+            "filename": file.filename,
+            "original": full_text,
+            "translated": translated_text,
+            "pages": total_pages,
+            "timestamp": datetime.now().isoformat(),
+            "status": "completed"
+        }
+        
+        logger.info(f"✅ PDF processed: {file.filename} ({total_pages} pages, {len(full_text)} chars)")
+        
+        # Return complete data
+        return {
+            "id": translation_id,
+            "filename": file.filename,
+            "pages": total_pages,
+            "original_length": len(full_text),
+            "translated_length": len(translated_text),
+            "status": "completed",
+            "timestamp": datetime.now().isoformat(),
+            "original": full_text,
+            "translated": translated_text
+        }
+        
+    except Exception as e:
+        logger.error(f"❌ PDF processing failed: {str(e)}")
+        raise HTTPException(
+            status_code=500,
+            detail={
+                "error": "PDF processing failed",
+                "message": str(e),
+                "translation_id": translation_id
+            }
+        )
+        
+    finally:
+        # Cleanup
+        if os.path.exists(tmp_path):
+            os.unlink(tmp_path)
+
+@app.get("/download/{translation_id}/{content_type}")
+async def download_translation(translation_id: str, content_type: str):
+    """
+    Download original or translated text
+    """
+    if translation_id not in translation_storage:
+        raise HTTPException(
+            status_code=404, 
+            detail={
+                "error": "Translation not found",
+                "translation_id": translation_id,
+                "available_ids": list(translation_storage.keys())[-5:]  # Last 5 IDs
+            }
+        )
+    
+    data = translation_storage[translation_id]
+    filename = data["filename"].replace('.pdf', '')
+    
+    if content_type == "original":
+        content = data["original"]
+        output_filename = f"{filename}_original.txt"
+    elif content_type == "translated":
+        content = data["translated"]
+        output_filename = f"{filename}_vietnamese.txt"
+    else:
+        raise HTTPException(
+            status_code=400,
+            detail={
+                "error": "Invalid content type",
+                "valid_types": ["original", "translated"],
+                "received": content_type
+            }
+        )
+    
+    # Create temp file for download
+    with tempfile.NamedTemporaryFile(mode='w', delete=False, suffix='.txt', encoding='utf-8') as tmp:
+        tmp.write(content)
+        tmp_path = tmp.name
+    
+    return FileResponse(
+        tmp_path, 
+        filename=output_filename, 
+        media_type='text/plain',
+        headers={
+            "Content-Disposition": f'attachment; filename="{output_filename}"'
+        }
+    )
+
+@app.get("/translations")
+def list_translations():
+    """List all stored translations"""
+    return {
+        "total": len(translation_storage),
+        "translations": [
+            {
+                "id": tid,
+                "filename": data["filename"],
+                "pages": data["pages"],
+                "timestamp": data["timestamp"],
+                "status": data.get("status", "unknown")
+            }
+            for tid, data in translation_storage.items()
+        ]
+    }
+
+@app.delete("/translations/{translation_id}")
+def delete_translation(translation_id: str):
+    """Delete a stored translation"""
+    if translation_id not in translation_storage:
+        raise HTTPException(status_code=404, detail="Translation not found")
+    
+    del translation_storage[translation_id]
+    return {"message": "Translation deleted", "id": translation_id}
+
+# Error handlers
+@app.exception_handler(404)
+async def not_found_handler(request, exc):
+    return JSONResponse(
+        status_code=404,
+        content={
+            "error": "Endpoint not found",
+            "path": str(request.url.path),
+            "method": request.method,
+            "available_endpoints": [
+                "/",
+                "/health", 
+                "/api/v1/large/translate",
+                "/docs",
+                "/redoc"
+            ]
+        }
+    )
+
+@app.exception_handler(500)
+async def internal_error_handler(request, exc):
+    logger.error(f"Internal error: {str(exc)}")
+    return JSONResponse(
+        status_code=500,
+        content={
+            "error": "Internal server error",
+            "message": "An unexpected error occurred",
+            "timestamp": datetime.now().isoformat()
+        }
+    )
+
+if __name__ == "__main__":
+    import uvicorn
+    print("🚀 PRISMY Translation API - Production Ready")
+    print("=" * 50)
+    print("📡 API Documentation: http://localhost:8000/docs")
+    print("🔗 Health Check: http://localhost:8000/health") 
+    print("🌐 Frontend: http://localhost:3000 or http://localhost:3001")  # ✅ UPDATED: Both ports
+    print("=" * 50)
+    uvicorn.run(app, host="0.0.0.0", port=8000, reload=True)

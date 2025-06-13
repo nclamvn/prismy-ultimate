@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>PRISMY Translation</title>
+    <style>
+        body { font-family: Arial; padding: 20px; background: #f0f0f0; }
+        .container { max-width: 600px; margin: 0 auto; background: white; padding: 30px; border-radius: 10px; }
+        input, select, button { padding: 10px; margin: 10px 0; width: 100%; }
+        button { background: #4CAF50; color: white; border: none; cursor: pointer; }
+        button:hover { background: #45a049; }
+        #status { margin-top: 20px; padding: 20px; background: #f9f9f9; display: none; }
+        .error { color: red; }
+        .success { color: green; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>PRISMY Translation System</h1>
+        
+        <h3>Translate PDF</h3>
+        <input type="file" id="pdfFile" accept=".pdf">
+        
+        <select id="targetLang">
+            <option value="vi">Vietnamese</option>
+            <option value="es">Spanish</option>
+            <option value="fr">French</option>
+        </select>
+        
+        <select id="tier">
+            <option value="standard">Standard (GPT-4)</option>
+            <option value="premium">Premium (GPT-4 + Claude)</option>
+        </select>
+        
+        <button onclick="translatePDF()">Translate PDF</button>
+        
+        <div id="status"></div>
+    </div>
+
+    <script>
+        async function translatePDF() {
+            const file = document.getElementById('pdfFile').files[0];
+            if (!file) {
+                alert('Please select a PDF file');
+                return;
+            }
+            
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('target_language', document.getElementById('targetLang').value);
+            formData.append('tier', document.getElementById('tier').value);
+            
+            const status = document.getElementById('status');
+            status.style.display = 'block';
+            status.innerHTML = 'Uploading...';
+            
+            try {
+                const response = await fetch('http://localhost:8000/api/v2/translate/pdf/async', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await response.json();
+                if (data.job_id) {
+                    status.innerHTML = 'Job submitted: ' + data.job_id + '<br>Checking status...';
+                    checkStatus(data.job_id);
+                }
+            } catch (error) {
+                status.innerHTML = '<span class="error">Error: ' + error.message + '</span>';
+            }
+        }
+        
+        async function checkStatus(jobId) {
+            const interval = setInterval(async () => {
+                try {
+                    const response = await fetch('http://localhost:8000/api/v2/translate/job/' + jobId);
+                    const data = await response.json();
+                    
+                    const status = document.getElementById('status');
+                    status.innerHTML = `
+                        Job ID: ${jobId}<br>
+                        Status: ${data.status}<br>
+                        Progress: ${data.progress || 0}%
+                    `;
+                    
+                    if (data.status === 'completed') {
+                        clearInterval(interval);
+                        status.innerHTML += `<br><span class="success">Translation completed!</span>`;
+                        status.innerHTML += `<br><a href="http://localhost:8000/api/v2/outputs/${data.output_path}/download" download="${data.output_path}">Download Result</a>`;
+                        // Auto download
+                        const downloadLink = document.createElement('a');
+                        downloadLink.href = `http://localhost:8000/api/v2/outputs/${data.output_path}/download`;
+                        downloadLink.download = data.output_path || 'translated.txt';
+                        document.body.appendChild(downloadLink);
+                        downloadLink.click();
+                        document.body.removeChild(downloadLink);
+                    } else if (data.status === 'failed') {
+                        clearInterval(interval);
+                        status.innerHTML += `<br><span class="error">Translation failed: ${data.error}</span>`;
+                    }
+                } catch (error) {
+                    clearInterval(interval);
+                    document.getElementById('status').innerHTML += '<br><span class="error">Error: ' + error.message + '</span>';
+                }
+            }, 2000);
+        }
+    </script>
+</body>
+</html>

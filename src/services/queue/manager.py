@@ -11,6 +11,7 @@ from pathlib import Path
 import redis.asyncio as redis
 from dataclasses import dataclass, asdict
 from enum import Enum
+from celery_app import app  # Import from our configured celery_app
 
 logger = logging.getLogger(__name__)
 
@@ -119,7 +120,31 @@ class QueueManager:
             mapping=job.to_dict()
         )
         
+        # Determine file type from file extension
+        file_type = "text" if file_path.endswith(('.txt', '.text')) else "pdf"
+        logger.info(f"Detected file type: {file_type} for {file_path}")
+        
+        # First save the job, then queue to Celery
         await self.add_to_queue(self.EXTRACT_QUEUE, job_id)
+
+        # Queue to Celery using our configured app
+        # Use process_translation to run the full pipeline
+        try:
+            task = app.send_task("prismy_tasks.process_translation",
+                                args=[job_id, file_path, file_type, target_lang, tier],
+                                queue="default")
+            logger.info(f"Queued process_translation task {task.id} for job {job_id}, file_type: {file_type}")
+        except Exception as e:
+            logger.error(f"Failed to send task via send_task: {e}")
+            # Option 2: Import and call directly
+            try:
+                from src.celery_tasks.prismy_tasks import process_translation
+                result = process_translation.delay(job_id, file_path, file_type, target_lang, tier)
+                logger.info(f"Queued process_translation task {result.id} for job {job_id} via direct call")
+            except Exception as e2:
+                logger.error(f"Failed to send task directly: {e2}")
+                # Still return the job even if Celery fails
+                # The job is in Redis and can be processed later
         
         logger.info(f"Created job {job_id} for {file_path}")
         return job

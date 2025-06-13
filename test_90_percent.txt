@@ -1,0 +1,1 @@
+This is a longer test document for translation testing. We want to see if jobs get stuck at 90% during the reconstruction phase. This should trigger all phases: extraction, translation, and reconstruction properly without getting stuck.

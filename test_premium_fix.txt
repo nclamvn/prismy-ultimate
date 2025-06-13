@@ -1,0 +1,1 @@
+This is a test document for Premium tier translation. We will test if the Redis WRONGTYPE error has been fixed completely.

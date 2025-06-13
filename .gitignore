@@ -2,55 +2,20 @@
 __pycache__/
 *.py[cod]
 *$py.class
-*.so
-.Python
 venv/
-env/
-ENV/
-.venv
+test_env/
+.env
+
+# Logs & temp files
+*.log
+logs/
+uploads/
+translated_*
+result_*
+
+# OS
+.DS_Store
 
 # Testing
 .pytest_cache/
 .coverage
-htmlcov/
-.tox/
-*.cover
-*.log
-
-# IDE
-.vscode/
-.idea/
-*.swp
-*.swo
-.DS_Store
-
-# Project specific
-storage/temp/*
-storage/uploads/*
-storage/outputs/*
-logs/*.log
-*.pid
-.pids
-
-# Celery
-celerybeat-schedule
-celerybeat.pid
-*.db
-
-# Environment
-.env
-.env.local
-
-# Backup files
-*.backup
-*.bak
-*_backup.*
-*.tar.gz
-
-# Temporary files
-tmp*
-temp*
-
-# Docker
-*.log
-docker-compose.override.yml

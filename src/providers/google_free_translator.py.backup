@@ -1,0 +1,47 @@
+from deep_translator import GoogleTranslator
+from typing import List
+import asyncio
+import logging
+
+logger = logging.getLogger(__name__)
+
+class GoogleFreeTranslator:
+    """Free Google Translate using deep-translator"""
+    
+    def __init__(self):
+        self.client = True  # Fake client to match interface
+        logger.info("Google Free Translator initialized with deep-translator")
+    
+    async def translate(self, text: str, target_language: str, source_language: str = 'auto') -> str:
+        """Translate text using free Google Translate"""
+        try:
+            loop = asyncio.get_event_loop()
+            result = await loop.run_in_executor(
+                None, 
+                self._translate_sync, 
+                text, 
+                target_language, 
+                source_language
+            )
+            return result
+        except Exception as e:
+            logger.error(f"Google Free translation error: {e}")
+            raise
+    
+    def _translate_sync(self, text: str, target_language: str, source_language: str) -> str:
+        """Sync translation helper"""
+        translator = GoogleTranslator(source=source_language, target=target_language)
+        return translator.translate(text)
+    
+    async def translate_batch(self, texts: List[str], target_language: str, 
+                            source_language: str = 'auto') -> List[str]:
+        """Translate multiple texts"""
+        results = []
+        for text in texts:
+            result = await self.translate(text, target_language, source_language)
+            results.append(result)
+        return results
+    
+    def translate_sync(self, text: str, target_language: str, source_language: str = 'auto') -> str:
+        """Synchronous translation"""
+        return self._translate_sync(text, target_language, source_language)

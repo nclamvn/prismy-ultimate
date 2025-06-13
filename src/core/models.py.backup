@@ -1,0 +1,31 @@
+from enum import Enum
+from pydantic import BaseModel
+from typing import Optional, Dict, Any
+from datetime import datetime
+
+class JobStatus(Enum):
+    PENDING = "pending"
+    EXTRACTING = "extracting"
+    TRANSLATING = "translating"
+    RECONSTRUCTING = "reconstructing"
+    COMPLETED = "completed"
+    FAILED = "failed"
+
+class TranslationTier(Enum):
+    BASIC = "basic"
+    STANDARD = "standard"
+    PREMIUM = "premium"
+
+class TranslationJob(BaseModel):
+    job_id: str
+    status: JobStatus
+    tier: TranslationTier
+    source_language: str = "auto"
+    target_language: str
+    file_name: Optional[str] = None
+    file_type: Optional[str] = None
+    progress: int = 0
+    created_at: datetime
+    updated_at: Optional[datetime] = None
+    error: Optional[str] = None
+    output_file: Optional[str] = None

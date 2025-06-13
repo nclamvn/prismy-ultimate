@@ -1,0 +1,16 @@
+aioboto3
+boto3
+botocore
+python-docx
+openpyxl
+xlrd
+reportlab
+PyPDF2
+pdfplumber
+pytesseract
+Pillow
+opencv-python
+scikit-learn
+matplotlib
+seaborn
+plotly

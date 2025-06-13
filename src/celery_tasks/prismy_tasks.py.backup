@@ -1,0 +1,455 @@
+import os
+import json
+import logging
+from typing import Dict, List, Optional, Tuple
+from celery_app import app as celery_app
+import redis
+import PyPDF2
+import pdfplumber
+from PIL import Image
+import pytesseract
+import io
+import re
+
+# Import từ local modules
+from src.services.storage_service import StorageService
+from src.services.queue.redis_client import get_redis_client
+from src.core.models import TranslationJob, JobStatus, TranslationTier
+from src.core.config import settings
+
+# Initialize Celery
+# Use main celery app
+
+# Configure Celery
+celery_app.conf.update(
+    task_serializer='json',
+    accept_content=['json'],
+    result_serializer='json',
+    timezone='UTC',
+    enable_utc=True,
+    task_track_started=True,
+    task_time_limit=3600,
+    task_soft_time_limit=3300,
+)
+
+logger = logging.getLogger(__name__)
+storage_service = StorageService()
+redis_client = get_redis_client()
+
+class PDFProcessor:
+    """Advanced PDF processing with text extraction and OCR support"""
+    
+    def __init__(self):
+        self.min_text_length = 10
+        self.ocr_languages = ['eng', 'vie']
+    
+    def extract_text_pypdf2(self, file_path: str) -> List[Dict]:
+        """Extract text using PyPDF2"""
+        pages_data = []
+        try:
+            with open(file_path, 'rb') as file:
+                pdf_reader = PyPDF2.PdfReader(file)
+                total_pages = len(pdf_reader.pages)
+                
+                for page_num in range(total_pages):
+                    page = pdf_reader.pages[page_num]
+                    text = page.extract_text()
+                    
+                    if text and len(text.strip()) > self.min_text_length:
+                        pages_data.append({
+                            'page': page_num + 1,
+                            'text': text.strip(),
+                            'method': 'pypdf2'
+                        })
+                        
+        except Exception as e:
+            logger.error(f"PyPDF2 extraction error: {str(e)}")
+            
+        return pages_data
+    
+    def extract_text_pdfplumber(self, file_path: str) -> List[Dict]:
+        """Extract text using pdfplumber (better for tables)"""
+        pages_data = []
+        try:
+            with pdfplumber.open(file_path) as pdf:
+                for page_num, page in enumerate(pdf.pages):
+                    # Extract text
+                    text = page.extract_text()
+                    
+                    # Extract tables
+                    tables = page.extract_tables()
+                    table_text = ""
+                    
+                    if tables:
+                        for table in tables:
+                            for row in table:
+                                if row:
+                                    table_text += " | ".join([str(cell) if cell else "" for cell in row]) + "\n"
+                    
+                    combined_text = f"{text or ''}\n{table_text}".strip()
+                    
+                    if combined_text and len(combined_text) > self.min_text_length:
+                        pages_data.append({
+                            'page': page_num + 1,
+                            'text': combined_text,
+                            'method': 'pdfplumber',
+                            'has_tables': bool(tables)
+                        })
+                        
+        except Exception as e:
+            logger.error(f"pdfplumber extraction error: {str(e)}")
+            
+        return pages_data
+    
+    def extract_with_ocr(self, file_path: str) -> List[Dict]:
+        """Extract text from scanned PDFs using OCR"""
+        pages_data = []
+        try:
+            with pdfplumber.open(file_path) as pdf:
+                for page_num, page in enumerate(pdf.pages):
+                    # Convert page to image
+                    pil_image = page.to_image(resolution=300).original
+                    
+                    # Perform OCR
+                    text = pytesseract.image_to_string(
+                        pil_image,
+                        lang='+'.join(self.ocr_languages)
+                    )
+                    
+                    if text and len(text.strip()) > self.min_text_length:
+                        pages_data.append({
+                            'page': page_num + 1,
+                            'text': text.strip(),
+                            'method': 'ocr'
+                        })
+                        
+        except Exception as e:
+            logger.error(f"OCR extraction error: {str(e)}")
+            
+        return pages_data
+    
+    def process_pdf(self, file_path: str) -> Dict:
+        """Main PDF processing method with fallback strategies"""
+        logger.info(f"Processing PDF: {file_path}")
+        
+        # Try PyPDF2 first (fastest)
+        pages_data = self.extract_text_pypdf2(file_path)
+        
+        # If not enough content, try pdfplumber
+        if not pages_data or sum(len(p['text']) for p in pages_data) < 100:
+            logger.info("Trying pdfplumber extraction...")
+            pages_data = self.extract_text_pdfplumber(file_path)
+        
+        # If still no content, try OCR (slowest but works on scanned PDFs)
+        if not pages_data or sum(len(p['text']) for p in pages_data) < 100:
+            logger.info("Trying OCR extraction...")
+            ocr_pages = self.extract_with_ocr(file_path)
+            pages_data.extend(ocr_pages)
+        
+        # Combine and clean results
+        final_pages = self._merge_pages_data(pages_data)
+        
+        return {
+            'pages': final_pages,
+            'total_pages': len(final_pages),
+            'total_characters': sum(len(p['text']) for p in final_pages),
+            'extraction_methods': list(set(p['method'] for p in final_pages))
+        }
+    
+    def _merge_pages_data(self, pages_data: List[Dict]) -> List[Dict]:
+        """Merge and deduplicate pages data"""
+        merged = {}
+        
+        for page in pages_data:
+            page_num = page['page']
+            if page_num not in merged or len(page['text']) > len(merged[page_num]['text']):
+                merged[page_num] = page
+        
+        return [merged[k] for k in sorted(merged.keys())]
+
+# Initialize PDF processor
+pdf_processor = PDFProcessor()
+
+@celery_app.task(name='prismy_tasks.extract_text')
+def extract_text(job_id: str, file_path: str, file_type: str) -> Dict:
+    """Extract text from uploaded file"""
+    try:
+        logger.info(f"Starting extraction for job {job_id}")
+        
+        # Update job status
+        job_data = json.loads(redis_client.get(f"prismy:job:{job_id}"))
+        job_data['status'] = JobStatus.EXTRACTING.value
+        job_data['progress'] = 10
+        redis_client.set(f"prismy:job:{job_id}", json.dumps(job_data))
+        
+        extracted_data = {}
+        
+        if file_type == 'pdf':
+            # Use our advanced PDF processor
+            extracted_data = pdf_processor.process_pdf(file_path)
+            
+            # Format for translation
+            text_chunks = []
+            for page in extracted_data['pages']:
+                chunks = _split_text_into_chunks(page['text'], max_chunk_size=1000)
+                for chunk in chunks:
+                    text_chunks.append({
+                        'page': page['page'],
+                        'text': chunk,
+                        'method': page['method']
+                    })
+            
+            extracted_data['chunks'] = text_chunks
+            
+        elif file_type == 'text':
+            # Read text file
+            with open(file_path, 'r', encoding='utf-8') as f:
+                content = f.read()
+            
+            chunks = _split_text_into_chunks(content, max_chunk_size=1000)
+            extracted_data = {
+                'chunks': [{'page': 1, 'text': chunk} for chunk in chunks],
+                'total_characters': len(content)
+            }
+        
+        # Update job with extraction results
+        job_data['extraction_result'] = extracted_data
+        job_data['progress'] = 30
+        redis_client.set(f"prismy:job:{job_id}", json.dumps(job_data))
+        
+        logger.info(f"Extraction completed for job {job_id}: {len(extracted_data.get('chunks', []))} chunks")
+        return extracted_data
+        
+    except Exception as e:
+        logger.error(f"Extraction failed for job {job_id}: {str(e)}")
+        job_data = json.loads(redis_client.get(f"prismy:job:{job_id}"))
+        job_data['status'] = JobStatus.FAILED.value
+        job_data['error'] = str(e)
+        redis_client.set(f"prismy:job:{job_id}", json.dumps(job_data))
+        raise
+
+def _split_text_into_chunks(text: str, max_chunk_size: int = 1000) -> List[str]:
+    """Split text into manageable chunks for translation"""
+    chunks = []
+    
+    # Split by paragraphs first
+    paragraphs = text.split('\n\n')
+    
+    current_chunk = ""
+    for para in paragraphs:
+        if len(current_chunk) + len(para) < max_chunk_size:
+            current_chunk += para + "\n\n"
+        else:
+            if current_chunk:
+                chunks.append(current_chunk.strip())
+            
+            # If paragraph is too long, split by sentences
+            if len(para) > max_chunk_size:
+                sentences = re.split(r'(?<=[.!?])\s+', para)
+                sentence_chunk = ""
+                
+                for sentence in sentences:
+                    if len(sentence_chunk) + len(sentence) < max_chunk_size:
+                        sentence_chunk += sentence + " "
+                    else:
+                        if sentence_chunk:
+                            chunks.append(sentence_chunk.strip())
+                        sentence_chunk = sentence + " "
+                
+                if sentence_chunk:
+                    chunks.append(sentence_chunk.strip())
+            else:
+                current_chunk = para + "\n\n"
+    
+    if current_chunk:
+        chunks.append(current_chunk.strip())
+    
+    return chunks
+
+@celery_app.task(name='prismy_tasks.translate_chunks')
+def translate_chunks(extracted_data: Dict, job_id: str, target_language: str, tier: str) -> List[Dict]:
+    """Translate text chunks using real translation APIs"""
+    try:
+        chunks = extracted_data.get('chunks', [])
+        logger.info(f"Starting translation for job {job_id}: {len(chunks)} chunks to {target_language}")
+        
+        # Import translation manager
+        from src.services.translation_manager import translation_manager
+        
+        # Update job status
+        job_data = json.loads(redis_client.get(f"prismy:job:{job_id}"))
+        job_data['status'] = JobStatus.TRANSLATING.value
+        job_data['progress'] = 40
+        redis_client.set(f"prismy:job:{job_id}", json.dumps(job_data))
+        
+        translated_chunks = []
+        total_chunks = len(chunks)
+        
+        # Prepare texts for batch translation
+        texts_to_translate = [chunk['text'] for chunk in chunks]
+        
+        # Batch translate if possible
+        if len(texts_to_translate) <= 10:  # Small batch, translate together
+            try:
+                translated_texts = translation_manager.translate_batch_sync(
+                    texts_to_translate, target_language, tier
+                )
+                
+                for i, (chunk, translated) in enumerate(zip(chunks, translated_texts)):
+                    translated_chunks.append({
+                        'page': chunk.get('page', 1),
+                        'original': chunk['text'],
+                        'translated': translated,
+                        'method': chunk.get('method', 'unknown')
+                    })
+                    
+                    # Update progress
+                    progress = 40 + int((i + 1) / total_chunks * 40)
+                    job_data['progress'] = progress
+                    redis_client.set(f"prismy:job:{job_id}", json.dumps(job_data))
+                    
+            except Exception as e:
+                logger.error(f"Batch translation failed, falling back to individual: {e}")
+                # Fall back to individual translation
+                for i, chunk in enumerate(chunks):
+                    translated_text = translation_manager.translate_sync(
+                        chunk['text'], target_language, tier
+                    )
+                    
+                    translated_chunks.append({
+                        'page': chunk.get('page', 1),
+                        'original': chunk['text'],
+                        'translated': translated_text,
+                        'method': chunk.get('method', 'unknown')
+                    })
+                    
+                    # Update progress
+                    progress = 40 + int((i + 1) / total_chunks * 40)
+                    job_data['progress'] = progress
+                    redis_client.set(f"prismy:job:{job_id}", json.dumps(job_data))
+        else:
+            # Large batch, translate individually to avoid timeout
+            for i, chunk in enumerate(chunks):
+                translated_text = translation_manager.translate_sync(
+                    chunk['text'], target_language, tier
+                )
+                
+                translated_chunks.append({
+                    'page': chunk.get('page', 1),
+                    'original': chunk['text'],
+                    'translated': translated_text,
+                    'method': chunk.get('method', 'unknown')
+                })
+                
+                # Update progress
+                progress = 40 + int((i + 1) / total_chunks * 40)
+                job_data['progress'] = progress
+                redis_client.set(f"prismy:job:{job_id}", json.dumps(job_data))
+        
+        # Save translation results
+        job_data['translation_result'] = translated_chunks
+        job_data['progress'] = 80
+        redis_client.set(f"prismy:job:{job_id}", json.dumps(job_data))
+        
+        logger.info(f"Translation completed for job {job_id}")
+        return translated_chunks
+        
+    except Exception as e:
+        logger.error(f"Translation failed for job {job_id}: {str(e)}")
+        job_data = json.loads(redis_client.get(f"prismy:job:{job_id}"))
+        job_data['status'] = JobStatus.FAILED.value
+        job_data['error'] = str(e)
+        redis_client.set(f"prismy:job:{job_id}", json.dumps(job_data))
+        raise
+
+@celery_app.task(name='prismy_tasks.reconstruct_document')
+def reconstruct_document(translated_chunks: List[Dict], job_id: str, output_format: str) -> str:
+    """Reconstruct translated document"""
+    try:
+        logger.info(f"Starting reconstruction for job {job_id}")
+        
+        # Update job status
+        job_data = json.loads(redis_client.get(f"prismy:job:{job_id}"))
+        job_data['status'] = JobStatus.RECONSTRUCTING.value
+        job_data['progress'] = 85
+        redis_client.set(f"prismy:job:{job_id}", json.dumps(job_data))
+        
+        # Group chunks by page
+        pages = {}
+        for chunk in translated_chunks:
+            page_num = chunk.get('page', 1)
+            if page_num not in pages:
+                pages[page_num] = []
+            pages[page_num].append(chunk['translated'])
+        
+        # Create output document
+        if output_format == 'text':
+            output_content = ""
+            for page_num in sorted(pages.keys()):
+                output_content += f"\n--- Page {page_num} ---\n"
+                output_content += "\n".join(pages[page_num])
+                output_content += "\n"
+        else:
+            # For PDF output, create structured text for now
+            # TODO: Implement proper PDF generation with formatting
+            output_content = "TRANSLATED DOCUMENT\n\n"
+            for page_num in sorted(pages.keys()):
+                output_content += f"PAGE {page_num}\n"
+                output_content += "=" * 50 + "\n"
+                output_content += "\n".join(pages[page_num])
+                output_content += "\n\n"
+        
+        # Save output file
+        output_filename = f"translated_{job_id}.txt"
+        output_path = os.path.join(settings.OUTPUT_DIR, output_filename)
+        
+        with open(output_path, 'w', encoding='utf-8') as f:
+            f.write(output_content)
+        
+        # Update job completion
+        job_data['status'] = JobStatus.COMPLETED.value
+        job_data['progress'] = 100
+        job_data['output_file'] = output_filename
+        job_data['output_path'] = output_path
+        redis_client.set(f"prismy:job:{job_id}", json.dumps(job_data))
+        
+        logger.info(f"Reconstruction completed for job {job_id}: {output_filename}")
+        return output_filename
+        
+    except Exception as e:
+        logger.error(f"Reconstruction failed for job {job_id}: {str(e)}")
+        job_data = json.loads(redis_client.get(f"prismy:job:{job_id}"))
+        job_data['status'] = JobStatus.FAILED.value
+        job_data['error'] = str(e)
+        redis_client.set(f"prismy:job:{job_id}", json.dumps(job_data))
+        raise
+
+# Chain tasks for complete workflow
+@celery_app.task(name='prismy_tasks.process_translation')
+def process_translation(job_id: str, file_path: str, file_type: str, 
+                       target_language: str, tier: str) -> str:
+    """Main translation pipeline"""
+    try:
+        # Execute tasks sequentially
+        logger.info(f"Starting translation pipeline for job {job_id}")
+        
+        # Step 1: Extract
+        extraction_result = extract_text(job_id, file_path, file_type)
+        
+        # Step 2: Translate
+        translated_chunks = translate_chunks(
+            extraction_result, job_id, target_language, tier
+        )
+        
+        # Step 3: Reconstruct
+        output_format = 'pdf' if file_type == 'pdf' else 'text'
+        output_filename = reconstruct_document(
+            translated_chunks, job_id, output_format
+        )
+        
+        logger.info(f"Translation pipeline completed for job {job_id}")
+        return output_filename
+        
+    except Exception as e:
+        logger.error(f"Translation pipeline failed for job {job_id}: {str(e)}")
+        raise

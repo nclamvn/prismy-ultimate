@@ -58,7 +58,7 @@ async def download_result(job_id: str):
             detail=f"Job is {job_info.get('status')}, not completed"
         )
     
-    output_file = job_info.get('output_file')
+    output_file = job_info.get("output_path")
     if not output_file or not os.path.exists(output_file):
         raise HTTPException(status_code=404, detail="Output file not found")
     
@@ -83,25 +83,11 @@ async def translate_text_async(
     tier: str = Form("basic")
 ):
     try:
-        temp_dir = "storage/temp"
-        os.makedirs(temp_dir, exist_ok=True)
-        
-        import tempfile
-        with tempfile.NamedTemporaryFile(
-            mode='w',
-            suffix='.txt',
-            dir=temp_dir,
-            delete=False
-        ) as f:
-            f.write(text)
-            file_path = f.name
-        
-        job_id = queue_manager.submit_extraction({
-            'file_path': file_path,
-            'target_language': target_language,
-            'tier': tier,
-            'file_type': 'text'
-        })
+        job_id = queue_manager.submit_text_translation(
+            text=text,
+            target_language=target_language,
+            tier=tier
+        )
         
         return JSONResponse({
             "job_id": job_id,
@@ -125,3 +111,80 @@ async def cancel_job(job_id: str):
         "status": "cancelled",
         "message": "Job cancelled successfully"
     })
+
+@router.get("/outputs")
+async def list_outputs():
+    """List all output files"""
+    import os
+    from pathlib import Path
+    
+    output_dir = Path("outputs")
+    if not output_dir.exists():
+        return {"files": []}
+    
+    files = []
+    for file in output_dir.glob("translated_*.txt"):
+        files.append({
+            "filename": file.name,
+            "size": file.stat().st_size,
+            "job_id": file.stem.replace("translated_", "")
+        })
+    
+    return {"files": files}
+
+
+@router.get("/outputs/{filename}/download")
+async def download_output_direct(filename: str):
+    """Download output file directly by filename"""
+    from pathlib import Path
+    from fastapi.responses import FileResponse
+    from fastapi import HTTPException
+    
+    file_path = Path("outputs") / filename
+    if not file_path.exists() or not file_path.is_file():
+        raise HTTPException(status_code=404, detail="File not found")
+    
+    return FileResponse(
+        path=str(file_path),
+        filename=filename,
+        media_type='application/octet-stream'
+    )
+
+
+@router.get("/outputs")
+async def list_outputs():
+    """List all output files"""
+    import os
+    from pathlib import Path
+    
+    output_dir = Path("outputs")
+    if not output_dir.exists():
+        return {"files": []}
+    
+    files = []
+    for file in output_dir.glob("translated_*.txt"):
+        files.append({
+            "filename": file.name,
+            "size": file.stat().st_size,
+            "job_id": file.stem.replace("translated_", "")
+        })
+    
+    return {"files": files}
+
+
+@router.get("/outputs/{filename}/download")
+async def download_output_direct(filename: str):
+    """Download output file directly by filename"""
+    from pathlib import Path
+    from fastapi.responses import FileResponse
+    from fastapi import HTTPException
+    
+    file_path = Path("outputs") / filename
+    if not file_path.exists() or not file_path.is_file():
+        raise HTTPException(status_code=404, detail="File not found")
+    
+    return FileResponse(
+        path=str(file_path),
+        filename=filename,
+        media_type='application/octet-stream'
+    )

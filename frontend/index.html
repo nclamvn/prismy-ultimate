@@ -148,9 +148,11 @@
 
         const formData = new FormData();
         formData.append('file', file);
+                formData.append('target_language', document.getElementById('targetLanguage').value);
+                formData.append('tier', document.getElementById('tier').value);
 
         try {
-            const response = await fetch('http://localhost:8000/translate', {
+            const response = await fetch('http://localhost:8000/api/v2/translate/pdf/async', {
                 method: 'POST',
                 body: formData
             });
