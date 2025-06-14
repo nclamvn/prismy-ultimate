@@ -625,3 +625,11 @@ if __name__ == "__main__":
     print("🌐 Frontend: http://localhost:3000 | http://localhost:3001 | http://localhost:3002")  # ✅ Updated
     print("=" * 50)
     uvicorn.run(app, host="0.0.0.0", port=8000, reload=True)
+# Debug port configuration
+import os
+print(f"🚀 STARTING ON PORT: {os.getenv('PORT', '8000')}")
+
+if __name__ == "__main__":
+    import uvicorn
+    port = int(os.getenv("PORT", 8000))
+    uvicorn.run(app, host="0.0.0.0", port=port)
